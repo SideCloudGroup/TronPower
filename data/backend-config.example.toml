@@ -1,0 +1,17 @@
+[wallet]
+# 建议使用多钱钱包。
+# 私钥对应的钱包需要对资源账户有资源控制权限，同时执行链上操作时会消耗带宽或TRX。
+private_key = "" # 钱包私钥
+
+[api]
+url = "" # 前端网址，建议使用https，结尾不要加斜杠
+key = "" # env中的API_KEY
+task_interval = 30 # 后端任务执行间隔时间（秒）
+
+[database]
+# 数据库配置
+host = "tronpower-mariadb"
+user = "root"
+password = "tronpower"
+database = "tronpower"
+# unix_socket = "" # unix socket，不知道请不要动

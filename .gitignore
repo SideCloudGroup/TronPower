@@ -1,0 +1,4 @@
+data/backend-config.toml
+data/mariadb
+data/redis
+web/
