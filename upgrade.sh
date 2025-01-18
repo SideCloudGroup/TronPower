@@ -14,7 +14,7 @@ echo -e "${BLUE}If there are changes in the file, it will be replaced with the l
 echo -e "${YELLOW}请按回车继续执行更新 | Press enter to continue...${NC}"
 read
 echo -e "${GREEN}正在升级到最新版本：$LATEST_TAG${NC}"
-
+cd /opt/TronPower
 docker compose down
 git pull
 wget -T 20 -q "https://github.com/$repo/releases/download/$LATEST_TAG/$filename.zip" -O "$filename.zip"
@@ -38,6 +38,15 @@ echo -e "${yellow}若前端配置文件有更新，请与web/.example.env对比�
 
 docker compose pull
 docker compose up -d
+
+echo -e "${YELLOW}是否要清理旧镜像？(y/n)${NC}"
+read prune_choice
+if [ "$prune_choice" = "y" ]; then
+    docker image prune -f
+    echo -e "${GREEN}旧镜像已清理${NC}"
+else
+    echo -e "${YELLOW}跳过旧镜像清理${NC}"
+fi
 
 echo -e "${GREEN}升级完成！${NC}"
 exit 0

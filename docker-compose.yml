@@ -55,10 +55,6 @@ services:
       - nginx
     networks:
       - tronpower-network
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
 
 networks:
   tronpower-network:
