@@ -1,61 +1,80 @@
 services:
   php-fpm:
-    image: pplulee/tronpower-php:latest
-    container_name: tronpower-php
+    image: pplulee/sidetp:latest
     volumes:
       - ./web:/var/www/html
+      - .env:/var/www/html/.env
+      - ./data/entrypoint.sh:/entrypoint.sh
     depends_on:
-      - mariadb
-    networks:
-      - tronpower-network
+      mariadb:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "test", "-f", "/var/run/php/php-fpm.pid" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     restart: always
+    logging:
+      options:
+        max-size: "3m"
+        max-file: "2"
 
   nginx:
     image: nginx:latest
-    container_name: tronpower-nginx
     ports:
-      - "127.0.0.1:7593:80"
+      - "127.0.0.1:${WEB_PORT}:80"
+    #      - "[::1]:${WEB_PORT}:80"
     volumes:
       - ./data/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./web:/var/www/html
     depends_on:
-      - php-fpm
-    networks:
-      - tronpower-network
+      php-fpm:
+        condition: service_healthy
     restart: always
+    logging:
+      options:
+        max-size: "3m"
+        max-file: "2"
 
   redis:
     image: redis:latest
-    container_name: tronpower-redis
     volumes:
       - ./data/redis:/data
-    networks:
-      - tronpower-network
     restart: always
+    logging:
+      options:
+        max-size: "3m"
+        max-file: "2"
 
   mariadb:
     image: mariadb:latest
-    container_name: tronpower-mariadb
-    environment:
-      MYSQL_ROOT_PASSWORD: tronpower # 请修改为自己的密码
-      MYSQL_DATABASE: tronpower
+    env_file:
+      - .env
     volumes:
       - ./data/mariadb/data:/var/lib/mysql
       - ./data/mariadb/conf:/etc/mysql/conf.d
-    networks:
-      - tronpower-network
     restart: always
+    command: --skip-log-bin
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "-h", "localhost", "-u${MARIADB_USER}", "-p${MARIADB_PASSWORD}", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      options:
+        max-size: "3m"
+        max-file: "2"
 
   backend:
     image: pplulee/tronpower:latest
-    container_name: tronpower-backend
     volumes:
-      - ./data/backend-config.toml:/app/config.toml
+      - ./backend-config.toml:/app/config.toml
     depends_on:
-      - nginx
-    networks:
-      - tronpower-network
-
-networks:
-  tronpower-network:
-    driver: bridge
+      php-fpm:
+        condition: service_healthy
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s

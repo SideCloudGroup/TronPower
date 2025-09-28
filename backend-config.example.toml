@@ -10,7 +10,7 @@ task_interval = 30 # 后端任务执行间隔时间（秒）
 
 [database]
 # 数据库配置
-host = "tronpower-mariadb"
+host = "mariadb"
 user = "root"
 password = "tronpower"
 database = "tronpower"
